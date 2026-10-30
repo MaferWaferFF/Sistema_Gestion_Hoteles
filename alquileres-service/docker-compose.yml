@@ -1,0 +1,23 @@
+alquileres-service:
+  build:
+    context: ./alquileres-service
+    dockerfile: Dockerfile
+  container_name: alquileres-service
+  restart: always
+  environment:
+    - MONGO_URI=mongodb://db-alquileres:27017
+    - DB_NAME=db_alquileres
+    - HABITACIONES_SERVICE_URL=http://habitaciones-service:3001
+    - HUESPEDES_SERVICE_URL=http://huespedes-service:3002
+    - PORT=3003
+  ports:
+    - "3003:3003"
+  depends_on:
+    db-alquileres:
+      condition: service_healthy
+    habitaciones-service:
+      condition: service_started
+    huespedes-service:
+      condition: service_started
+  networks:
+    - red-hoteleria-unu

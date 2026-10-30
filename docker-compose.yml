@@ -1,0 +1,151 @@
+services:
+  # ==========================================
+  # 1. Microservicio Huéspedes y SQL Server
+  # ==========================================
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sqlserver_huespedes
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=Password123!
+      - MSSQL_PID=Express
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssqldata_huespedes:/var/opt/mssql
+    healthcheck:
+      test: ["CMD", "/opt/mssql-tools18/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "Password123!", "-C", "-Q", "SELECT 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+      start_period: 10s
+    networks:
+      - hotel-network
+
+  sqlserver-init:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sqlserver_init
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    entrypoint: ["/opt/mssql-tools18/bin/sqlcmd", "-S", "sqlserver", "-U", "sa", "-P", "Password123!", "-C", "-Q", "IF DB_ID('db_huespedes') IS NULL CREATE DATABASE db_huespedes;"]
+    networks:
+      - hotel-network
+
+  huespedes-service:
+    build:
+      context: ./huespedes-service
+      dockerfile: Dockerfile
+    container_name: huespedes-service
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:sqlserver://sqlserver:1433;databaseName=db_huespedes;encrypt=true;trustServerCertificate=true;
+      - SPRING_DATASOURCE_USERNAME=sa
+      - SPRING_DATASOURCE_PASSWORD=Password123!
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SERVICES_ALQUILERES_URL=http://alquileres-service:3003
+    depends_on:
+      sqlserver-init:
+        condition: service_completed_successfully
+    networks:
+      - hotel-network
+
+  # ==========================================
+  # 2. Microservicio Habitaciones y MySQL
+  # ==========================================
+  habitaciones-db:
+    build:
+      context: ./habitaciones-service
+      dockerfile: Dockerfile.mysql
+    container_name: habitaciones-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root12345
+      MYSQL_DATABASE: db_habitaciones
+    ports:
+      - "3306:3306"
+    volumes:
+      - habitaciones_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot12345"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - hotel-network
+
+  habitaciones-service:
+    build:
+      context: ./habitaciones-service-alineado-documento
+      dockerfile: Dockerfile
+    container_name: habitaciones-service
+    ports:
+      - "8001:8001"
+    environment:
+      DB_HOST: habitaciones-db
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: root12345
+      DB_NAME: db_habitaciones
+    depends_on:
+      habitaciones-db:
+        condition: service_healthy
+    networks:
+      - hotel-network
+
+  # ==========================================
+  # 3. Microservicio Alquileres (Orquestador) y MongoDB
+  # ==========================================
+  db-alquileres:
+    image: mongo:7.0
+    container_name: db-alquileres
+    ports:
+      - "27017:27017"
+    volumes:
+      - alquileres_data:/data/db
+    networks:
+      - hotel-network
+
+  alquileres-service:
+    build:
+      context: ./alquileres-service
+      dockerfile: Dockerfile
+    container_name: alquileres-service
+    restart: always
+    environment:
+      - MONGO_URI=mongodb://db-alquileres:27017
+      - DB_NAME=db_alquileres
+      - HABITACIONES_SERVICE_URL=http://habitaciones-service:8001
+      - HUESPEDES_SERVICE_URL=http://huespedes-service:8082
+      - PORT=3003
+    ports:
+      - "3003:3003"
+    depends_on:
+      - db-alquileres
+      - habitaciones-service
+      - huespedes-service
+    networks:
+      - hotel-network
+
+  # ==========================================
+  # 4. Frontend Web Unificado
+  # ==========================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: hotel-frontend
+    restart: always
+    ports:
+      - "5000:80"
+    networks:
+      - hotel-network
+
+volumes:
+  mssqldata_huespedes:
+  habitaciones_data:
+  alquileres_data:
+
+networks:
+  hotel-network:
+    driver: bridge

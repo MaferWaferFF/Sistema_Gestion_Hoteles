@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aura Hotel - Suite de Gestión de Microservicios</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- App Wrapper -->
+  <div class="app-layout">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 21h18M3 7v14M21 7v14M6 3h12l3 4H3l3-4zM9 10h2M13 10h2M9 14h2M13 14h2M9 18h2M13 18h2"/>
+          </svg>
+        </div>
+        <div class="brand-info">
+          <h2>AURA HOTEL</h2>
+          <span class="badge-unu">UNU • Microservicios</span>
+        </div>
+      </div>
+
+      <nav class="nav-menu">
+        <button class="nav-item active" data-tab="dashboard">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/>
+          </svg>
+          <span>Dashboard</span>
+        </button>
+
+        <button class="nav-item" data-tab="alquileres">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M9 14l2 2 4-4"/>
+          </svg>
+          <span>Alquileres <span class="tag-orchestrator">Orquestador</span></span>
+        </button>
+
+        <button class="nav-item" data-tab="habitaciones">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M2 4v16M2 8h18a2 2 0 0 1 2 2v10M2 17h20M6 8v9"/>
+          </svg>
+          <span>Habitaciones</span>
+        </button>
+
+        <button class="nav-item" data-tab="huespedes">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+          <span>Huéspedes</span>
+        </button>
+
+        <button class="nav-item" data-tab="monitor">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242M12 12v9m-4-4l4 4 4-4"/>
+          </svg>
+          <span>Monitor Microservicios</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-chip">
+          <div class="avatar">EP</div>
+          <div class="user-meta">
+            <strong>Ingeniería de Sistemas</strong>
+            <small>Taller de Desarrollo</small>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      
+      <!-- Top Header -->
+      <header class="top-header">
+        <div class="page-title">
+          <h1 id="view-title">Dashboard General</h1>
+          <p id="view-subtitle">Monitoreo y orquestación integral de la plataforma hotelera</p>
+        </div>
+
+        <div class="header-actions">
+          <!-- Live Service Status Indicators -->
+          <div class="service-pills">
+            <div class="status-pill" id="pill-habitaciones" title="FastAPI + MySQL (:8001)">
+              <span class="dot"></span>
+              <span class="name">Habitaciones</span>
+            </div>
+            <div class="status-pill" id="pill-huespedes" title="Spring Boot + SQL Server (:8082)">
+              <span class="dot"></span>
+              <span class="name">Huéspedes</span>
+            </div>
+            <div class="status-pill" id="pill-alquileres" title="FastAPI + MongoDB (:3003)">
+              <span class="dot"></span>
+              <span class="name">Alquileres</span>
+            </div>
+          </div>
+
+          <button id="btn-refresh-all" class="btn btn-icon" title="Sincronizar todos los servicios">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <!-- VIEW: DASHBOARD -->
+      <section id="view-dashboard" class="content-view active">
+        <!-- KPI Cards Grid -->
+        <div class="kpi-grid">
+          <div class="kpi-card" style="--accent-color: #6366f1;">
+            <div class="kpi-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M9 14l2 2 4-4"/></svg>
+            </div>
+            <div class="kpi-content">
+              <span class="kpi-label">Alquileres Vigentes</span>
+              <h3 class="kpi-value" id="kpi-alquileres-vigentes">-</h3>
+              <small class="kpi-desc">Gestionados por alquileres-service</small>
+            </div>
+          </div>
+
+          <div class="kpi-card" style="--accent-color: #10b981;">
+            <div class="kpi-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 4v16M2 8h18a2 2 0 0 1 2 2v10M2 17h20M6 8v9"/></svg>
+            </div>
+            <div class="kpi-content">
+              <span class="kpi-label">Habitaciones Disponibles</span>
+              <h3 class="kpi-value" id="kpi-hab-disponibles">-</h3>
+              <small class="kpi-desc" id="kpi-hab-total-desc">De un total registrado</small>
+            </div>
+          </div>
+
+          <div class="kpi-card" style="--accent-color: #f43f5e;">
+            <div class="kpi-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 14.14 14.14"/></svg>
+            </div>
+            <div class="kpi-content">
+              <span class="kpi-label">Habitaciones Ocupadas</span>
+              <h3 class="kpi-value" id="kpi-hab-ocupadas">-</h3>
+              <small class="kpi-desc">Sincronizadas automáticamente</small>
+            </div>
+          </div>
+
+          <div class="kpi-card" style="--accent-color: #38bdf8;">
+            <div class="kpi-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            </div>
+            <div class="kpi-content">
+              <span class="kpi-label">Huéspedes Activos</span>
+              <h3 class="kpi-value" id="kpi-huespedes-activos">-</h3>
+              <small class="kpi-desc">En db_huespedes (SQL Server)</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dashboard Two-Column Layout -->
+        <div class="dashboard-grid">
+          <!-- Quick Action Card -->
+          <div class="glass-panel">
+            <div class="panel-header">
+              <h3>Orquestación Rápida</h3>
+              <span class="tag">Flujo Completo</span>
+            </div>
+            <p class="panel-text">Inicia un nuevo contrato asociando un huésped validado con una habitación disponible. El orquestador actualizará el estado de la habitación de forma automática.</p>
+            <div class="panel-actions">
+              <button class="btn btn-primary" onclick="openModalNuevoAlquiler()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Registrar Alquiler
+              </button>
+              <button class="btn btn-secondary" onclick="openModalNuevaHabitacion()">+ Nueva Habitación</button>
+              <button class="btn btn-secondary" onclick="openModalNuevoHuesped()">+ Nuevo Huésped</button>
+            </div>
+          </div>
+
+          <!-- Microservices Status Overview -->
+          <div class="glass-panel">
+            <div class="panel-header">
+              <h3>Arquitectura Distribuida</h3>
+              <span class="tag tag-online">Interconectados</span>
+            </div>
+            <div class="architecture-list">
+              <div class="arch-item">
+                <span class="arch-badge">MS 1</span>
+                <div class="arch-info">
+                  <strong>Habitaciones Service (:8001)</strong>
+                  <small>FastAPI • MySQL • Catálogo de Habitaciones</small>
+                </div>
+                <span class="badge" id="status-text-hab">Verificando...</span>
+              </div>
+
+              <div class="arch-item">
+                <span class="arch-badge">MS 2</span>
+                <div class="arch-info">
+                  <strong>Huéspedes Service (:8082)</strong>
+                  <small>Spring Boot 3.3 • SQL Server • Gestión de Pasajeros</small>
+                </div>
+                <span class="badge" id="status-text-hue">Verificando...</span>
+              </div>
+
+              <div class="arch-item">
+                <span class="arch-badge">MS 3</span>
+                <div class="arch-info">
+                  <strong>Alquileres Service (:3003)</strong>
+                  <small>FastAPI • MongoDB • Orquestador de Negocio (RN01-RN05)</small>
+                </div>
+                <span class="badge" id="status-text-alq">Verificando...</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Rentals Table Preview -->
+        <div class="glass-panel mt-6">
+          <div class="panel-header">
+            <h3>Alquileres Recientes</h3>
+            <button class="btn btn-sm btn-secondary" onclick="switchTab('alquileres')">Ver Todos</button>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table" id="tabla-dashboard-alquileres">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Huésped</th>
+                  <th>Habitación</th>
+                  <th>Fechas</th>
+                  <th>Monto</th>
+                  <th>Estado</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td colspan="7" class="text-center text-muted">Cargando contratos...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: ALQUILERES -->
+      <section id="view-alquileres" class="content-view">
+        <div class="view-toolbar">
+          <div class="filter-group">
+            <button class="filter-btn active" data-filter-alquiler="todos">Todos</button>
+            <button class="filter-btn" data-filter-alquiler="vigente">Vigentes</button>
+            <button class="filter-btn" data-filter-alquiler="finalizado">Finalizados</button>
+            <button class="filter-btn" data-filter-alquiler="cancelado">Cancelados</button>
+          </div>
+          <button class="btn btn-primary" onclick="openModalNuevoAlquiler()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Nuevo Alquiler (Orquestar)
+          </button>
+        </div>
+
+        <div class="glass-panel">
+          <div class="table-responsive">
+            <table class="data-table" id="tabla-alquileres">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Huésped Asociado</th>
+                  <th>Habitación</th>
+                  <th>Periodo de Estadía</th>
+                  <th>Monto Total</th>
+                  <th>Estado</th>
+                  <th>Acciones de Orquestación</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Rendered by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: HABITACIONES -->
+      <section id="view-habitaciones" class="content-view">
+        <div class="view-toolbar">
+          <div class="filter-group">
+            <button class="filter-btn active" data-filter-hab="todas">Todas</button>
+            <button class="filter-btn" data-filter-hab="Disponible">Disponibles</button>
+            <button class="filter-btn" data-filter-hab="Ocupada">Ocupadas</button>
+            <button class="filter-btn" data-filter-hab="En Mantenimiento">Mantenimiento</button>
+          </div>
+          <button class="btn btn-primary" onclick="openModalNuevaHabitacion()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Nueva Habitación
+          </button>
+        </div>
+
+        <div class="cards-grid" id="grid-habitaciones">
+          <!-- Rendered by JS -->
+        </div>
+      </section>
+
+      <!-- VIEW: HUÉSPEDES -->
+      <section id="view-huespedes" class="content-view">
+        <div class="view-toolbar">
+          <div class="search-box">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <input type="text" id="input-buscar-huesped" placeholder="Buscar por DNI, nombres o apellidos...">
+          </div>
+          <div class="actions-group">
+            <button class="filter-btn active" id="btn-toggle-huespedes-activos">Solo Activos</button>
+            <button class="btn btn-primary" onclick="openModalNuevoHuesped()">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Nuevo Huésped
+            </button>
+          </div>
+        </div>
+
+        <div class="glass-panel">
+          <div class="table-responsive">
+            <table class="data-table" id="tabla-huespedes">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Huésped</th>
+                  <th>DNI</th>
+                  <th>Contacto</th>
+                  <th>Estadía Estimada</th>
+                  <th>Estado Lógico</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Rendered by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: MONITOR -->
+      <section id="view-monitor" class="content-view">
+        <div class="monitor-container">
+          <div class="glass-panel">
+            <div class="panel-header">
+              <h3>Inspección de Conectividad en Tiempo Real</h3>
+              <button class="btn btn-sm btn-secondary" onclick="checkAllServicesHealth(true)">Test Latencia</button>
+            </div>
+            <div class="monitor-cards">
+              
+              <div class="monitor-card" id="card-mon-hab">
+                <div class="mon-header">
+                  <strong>Habitaciones Service</strong>
+                  <span class="mon-ping" id="ping-hab">-- ms</span>
+                </div>
+                <div class="mon-body">
+                  <p><strong>URL Base:</strong> <code id="cfg-url-hab">http://localhost:8001</code></p>
+                  <p><strong>Motor:</strong> FastAPI + MySQL 8.0</p>
+                  <p><strong>Healthcheck:</strong> <code>/health</code></p>
+                  <p><strong>Estado:</strong> <span class="badge" id="mon-status-hab">Verificando</span></p>
+                </div>
+              </div>
+
+              <div class="monitor-card" id="card-mon-hue">
+                <div class="mon-header">
+                  <strong>Huéspedes Service</strong>
+                  <span class="mon-ping" id="ping-hue">-- ms</span>
+                </div>
+                <div class="mon-body">
+                  <p><strong>URL Base:</strong> <code id="cfg-url-hue">http://localhost:8082</code></p>
+                  <p><strong>Motor:</strong> Spring Boot 3.3 + SQL Server</p>
+                  <p><strong>Endpoint:</strong> <code>/api/huespedes</code></p>
+                  <p><strong>Estado:</strong> <span class="badge" id="mon-status-hue">Verificando</span></p>
+                </div>
+              </div>
+
+              <div class="monitor-card" id="card-mon-alq">
+                <div class="mon-header">
+                  <strong>Alquileres Service (Orquestador)</strong>
+                  <span class="mon-ping" id="ping-alq">-- ms</span>
+                </div>
+                <div class="mon-body">
+                  <p><strong>URL Base:</strong> <code id="cfg-url-alq">http://localhost:3003</code></p>
+                  <p><strong>Motor:</strong> FastAPI + MongoDB</p>
+                  <p><strong>Healthcheck:</strong> <code>/health</code></p>
+                  <p><strong>Estado:</strong> <span class="badge" id="mon-status-alq">Verificando</span></p>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Business Rules Overview -->
+          <div class="glass-panel mt-6">
+            <div class="panel-header">
+              <h3>Matriz de Reglas de Negocio Coordinadas</h3>
+            </div>
+            <div class="rules-grid">
+              <div class="rule-box">
+                <h4>RN01: Disponibilidad Previa</h4>
+                <p>Una habitación solo puede alquilarse si se encuentra en estado <code>Disponible</code>.</p>
+              </div>
+              <div class="rule-box">
+                <h4>RN02: Ocupación Automática</h4>
+                <p>Al confirmar el alquiler en <code>:3003</code>, se sincroniza el estado a <code>Ocupada</code> en <code>:8001</code>.</p>
+              </div>
+              <div class="rule-box">
+                <h4>RN03: Liberación al Finalizar</h4>
+                <p>Al finalizar el contrato en <code>:3003</code>, se revierte automáticamente a <code>Disponible</code>.</p>
+              </div>
+              <div class="rule-box">
+                <h4>RN04: Integridad Referencial Activa</h4>
+                <p>Huéspedes (<code>:8082</code>) consulta a Alquileres antes de permitir una baja lógica o eliminación.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- MODALS -->
+
+  <!-- Modal: Nuevo Alquiler (Orquestador) -->
+  <div class="modal-overlay" id="modal-nuevo-alquiler">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Registrar Alquiler (Orquestación RF06)</h3>
+        <button class="btn-close" onclick="closeModal('modal-nuevo-alquiler')">&times;</button>
+      </div>
+      <form id="form-nuevo-alquiler">
+        <div class="form-group">
+          <label for="select-alquiler-huesped">Seleccionar Huésped Activo (Spring Boot :8082)</label>
+          <select id="select-alquiler-huesped" required>
+            <option value="">Cargando huéspedes...</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="select-alquiler-habitacion">Seleccionar Habitación Disponible (FastAPI :8001)</label>
+          <select id="select-alquiler-habitacion" required>
+            <option value="">Cargando habitaciones...</option>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="alq-fecha-inicio">Fecha de Inicio</label>
+            <input type="date" id="alq-fecha-inicio" required>
+          </div>
+          <div class="form-group">
+            <label for="alq-fecha-fin">Fecha de Fin (RN05: >= Inicio)</label>
+            <input type="date" id="alq-fecha-fin" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="alq-monto">Monto Total Estimado (S/.)</label>
+          <input type="number" id="alq-monto" step="0.01" min="0" placeholder="0.00" required>
+          <small class="form-hint" id="hint-calculo-monto">Se calculará según las noches y el precio por noche.</small>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-nuevo-alquiler')">Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="btn-submit-alquiler">Confirmar Alquiler</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Nueva Habitación -->
+  <div class="modal-overlay" id="modal-nueva-habitacion">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Nueva Habitación (MySQL :8001)</h3>
+        <button class="btn-close" onclick="closeModal('modal-nueva-habitacion')">&times;</button>
+      </div>
+      <form id="form-nueva-habitacion">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="hab-numero">Número de Habitación</label>
+            <input type="text" id="hab-numero" placeholder="Ej: 301" required>
+          </div>
+          <div class="form-group">
+            <label for="hab-piso">Piso</label>
+            <input type="number" id="hab-piso" min="0" value="1" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="hab-descripcion">Descripción / Tipo</label>
+          <input type="text" id="hab-descripcion" placeholder="Ej: Suite Matrimonial con Jacuzzi">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="hab-precio">Precio por Noche (S/.)</label>
+            <input type="number" id="hab-precio" step="0.01" min="0" placeholder="150.00" required>
+          </div>
+          <div class="form-group">
+            <label for="hab-estado">Estado Inicial</label>
+            <select id="hab-estado" required>
+              <option value="Disponible">Disponible</option>
+              <option value="En Mantenimiento">En Mantenimiento</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-nueva-habitacion')">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar Habitación</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Nuevo Huésped -->
+  <div class="modal-overlay" id="modal-nuevo-huesped">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Nuevo Huésped (SQL Server :8082)</h3>
+        <button class="btn-close" onclick="closeModal('modal-nuevo-huesped')">&times;</button>
+      </div>
+      <form id="form-nuevo-huesped">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="hue-nombres">Nombres</label>
+            <input type="text" id="hue-nombres" placeholder="Nombres completos" required>
+          </div>
+          <div class="form-group">
+            <label for="hue-apellidos">Apellidos</label>
+            <input type="text" id="hue-apellidos" placeholder="Apellidos completos" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="hue-dni">DNI (8 dígitos)</label>
+            <input type="text" id="hue-dni" pattern="[0-9]{8}" maxlength="8" placeholder="72345678" required>
+          </div>
+          <div class="form-group">
+            <label for="hue-tel">Teléfono (9 dígitos)</label>
+            <input type="text" id="hue-tel" pattern="[0-9]{9}" maxlength="9" placeholder="987654321">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="hue-email">Correo Electrónico</label>
+          <input type="email" id="hue-email" placeholder="cliente@correo.com" required>
+        </div>
+
+        <div class="form-group">
+          <label for="hue-direccion">Dirección</label>
+          <input type="text" id="hue-direccion" placeholder="Av. Principal #123">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="hue-nacionalidad">Nacionalidad</label>
+            <input type="text" id="hue-nacionalidad" value="Peruana">
+          </div>
+          <div class="form-group">
+            <label for="hue-nacimiento">Fecha de Nacimiento</label>
+            <input type="date" id="hue-nacimiento">
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-nuevo-huesped')">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Registrar Huésped</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
